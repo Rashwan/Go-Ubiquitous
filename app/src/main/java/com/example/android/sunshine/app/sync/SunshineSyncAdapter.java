@@ -376,6 +376,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
+
     private void notifyWeather() {
         Context context = getContext();
         //checking the last update and notify if it' the first of the day

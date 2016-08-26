@@ -27,13 +27,21 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Wearable;
+
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -51,7 +59,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
     }
 
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    private class Engine extends CanvasWatchFaceService.Engine implements
+            GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
         Paint mTextPaint;
@@ -73,12 +82,16 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
         Resources resources;
+        Paint datePaint;
+        GoogleApiClient googleApiClient;
+        private final String TAG = Engine.class.getSimpleName();
+
 
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
-
+            googleApiClient = createGoogleApiClient();
             setWatchFaceStyle(new WatchFaceStyle.Builder(SunshineWatchFace.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
@@ -94,15 +107,30 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             mTextPaint = new Paint();
             mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
 
+            datePaint = createDatePaint(resources.getColor(R.color.grey));
+
             mCalendar = Calendar.getInstance();
         }
 
-
+        private GoogleApiClient createGoogleApiClient(){
+            return new GoogleApiClient.Builder(getApplicationContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(Wearable.API).build();
+        }
         private Paint createTextPaint(int textColor) {
             Paint paint = new Paint();
             paint.setColor(textColor);
             paint.setTypeface(NORMAL_TYPEFACE);
             paint.setAntiAlias(true);
+            return paint;
+        }
+        private Paint createDatePaint(int textColor){
+            Paint paint = new Paint();
+            paint.setColor(textColor);
+            paint.setTypeface(NORMAL_TYPEFACE);
+            paint.setAntiAlias(true);
+            paint.setTextSize(25);
             return paint;
         }
 
@@ -215,12 +243,37 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             }
 
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
+
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
 
-            String text =String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
+            String monthText = mCalendar.getDisplayName(Calendar.MONTH,Calendar.SHORT, Locale.getDefault());
+            String dayText = mCalendar.getDisplayName(Calendar.DAY_OF_WEEK,Calendar.SHORT, Locale.getDefault());
+            String dayYearText = String.format("%02d %d",mCalendar.get(Calendar.DAY_OF_MONTH)
+                    ,mCalendar.get(Calendar.YEAR));
+            String formattedDate = String.format("%s, %s %s",dayText,monthText,dayYearText);
+            String timeText =String.format("%d:%02d", mCalendar.get(Calendar.HOUR),
                     mCalendar.get(Calendar.MINUTE));
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+            canvas.drawText(timeText, mXOffset, mYOffset, mTextPaint);
+            canvas.drawText(formattedDate, mXOffset, mYOffset+40, datePaint);
+            canvas.drawLine(mXOffset,mYOffset + 60,mXOffset + 20,mYOffset + 60,datePaint);
+        }
+
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            Log.d(TAG,"Google api connected");
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.d(TAG,"Google api suspended");
+
+        }
+
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+            Log.d(TAG,"Google api connection failed");
+
         }
     }
 }
