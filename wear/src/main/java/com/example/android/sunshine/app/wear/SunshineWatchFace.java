@@ -72,6 +72,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
          * disable anti-aliasing in ambient mode.
          */
         boolean mLowBitAmbient;
+        Resources resources;
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -83,7 +85,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                     .setShowSystemUiTime(false)
                     .setAcceptsTapEvents(true)
                     .build());
-            Resources resources = SunshineWatchFace.this.getResources();
+            resources =SunshineWatchFace.this.getResources();
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
 
             mBackgroundPaint = new Paint();
@@ -172,9 +174,9 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 if (mLowBitAmbient) {
                     mTextPaint.setAntiAlias(!inAmbientMode);
                 }
-//                if (mAmbient){
-//                    mBackgroundPaint.setColor(resources.getColor(R.color.background));
-//                }
+                if (mAmbient){
+                    mBackgroundPaint.setColor(resources.getColor(R.color.black));
+                }
                 invalidate();
             }
 
