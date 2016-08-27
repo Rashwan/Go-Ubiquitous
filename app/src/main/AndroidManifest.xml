@@ -179,7 +179,11 @@
         </service>
         <service
             android:name=".gcm.RegistrationIntentService"
-            android:exported="false"></service>
+            android:exported="false">
+        </service>
+        <service android:name=".sync.WearSyncService">
+
+        </service>
     </application>
 
 </manifest>

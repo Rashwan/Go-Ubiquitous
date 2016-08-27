@@ -347,6 +347,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 updateWidgets();
                 updateMuzei();
                 notifyWeather();
+                updateWear();
             }
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
             setLocationStatus(getContext(), LOCATION_STATUS_OK);
@@ -374,6 +375,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             context.startService(new Intent(ACTION_DATA_UPDATED)
                     .setClass(context, WeatherMuzeiSource.class));
         }
+    }
+
+    private void updateWear(){
+        Log.d(LOG_TAG,"update wear called");
+        Context context = getContext();
+        Intent intent = new Intent(context,WearSyncService.class);
+        intent.setAction(WearSyncService.ACTION_UPDATE_WATCHFACE);
+        context.startService(intent);
     }
 
 
