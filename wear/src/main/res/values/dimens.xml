@@ -2,7 +2,28 @@
 <resources>
     <dimen name="digital_text_size">40dp</dimen>
     <dimen name="digital_text_size_round">45dp</dimen>
-    <dimen name="digital_x_offset">45dp</dimen>
+    <dimen name="digital_x_offset">40dp</dimen>
     <dimen name="digital_x_offset_round">65dp</dimen>
-    <dimen name="digital_y_offset">90dp</dimen>
+    <dimen name="digital_y_offset">70dp</dimen>
+    <dimen name="date_x_offset">40dp</dimen>
+    <dimen name="date_x_offset_round">20dp</dimen>
+    <dimen name="date_y_offset">100dp</dimen>
+    <dimen name="date_y_offset_round">130dp</dimen>
+    <dimen name="start_line_x_offset">75dp</dimen>
+    <dimen name="start_line_x_offset_round">50dp</dimen>
+    <dimen name="start_line_y_offset">115dp</dimen>
+    <dimen name="start_line_y_offset_round">110dp</dimen>
+    <dimen name="line_length">30dp</dimen>
+    <dimen name="image_x_offset">15dp</dimen>
+    <dimen name="image_x_offset_round">30dp</dimen>
+    <dimen name="image_y_offset">120dp</dimen>
+    <dimen name="image_y_offset_round">150dp</dimen>
+    <dimen name="max_x_offset">70dp</dimen>
+    <dimen name="max_x_offset_round">70dp</dimen>
+    <dimen name="max_y_offset">155dp</dimen>
+    <dimen name="max_y_offset_round">170dp</dimen>
+    <dimen name="min_x_offset">115dp</dimen>
+    <dimen name="min_x_offset_round">100dp</dimen>
+    <dimen name="min_y_offset">155dp</dimen>
+    <dimen name="min_y_offset_round">170dp</dimen>
 </resources>
