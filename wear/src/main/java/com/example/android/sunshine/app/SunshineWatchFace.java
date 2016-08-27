@@ -88,6 +88,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         float maxYOffset;
         float minXOffset;
         float minYOffset;
+        int imageWidth;
+        int imageHeight;
 
         /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
@@ -136,7 +138,6 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                     Log.d(TAG,minTemp);
                     maxTemp = intent.getStringExtra("MAX_TEMP");
                     weatherBitmap = intent.getParcelableExtra("IMAGE");
-                    weatherBitmap = Bitmap.createScaledBitmap(weatherBitmap,75,75,false);
 
                     invalidate();
 
@@ -164,7 +165,6 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             paint.setColor(textColor);
             paint.setTypeface(NORMAL_TYPEFACE);
             paint.setAntiAlias(true);
-            paint.setTextSize(22);
             return paint;
         }
         private Paint createMaxTempPaint(int textColor){
@@ -172,7 +172,6 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             paint.setColor(textColor);
             paint.setTypeface(Typeface.DEFAULT_BOLD);
             paint.setAntiAlias(true);
-            paint.setTextSize(38);
             return paint;
         }
         private Paint createMinTempPaint(int textColor){
@@ -180,7 +179,6 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             paint.setColor(textColor);
             paint.setTypeface(Typeface.MONOSPACE);
             paint.setAntiAlias(true);
-            paint.setTextSize(38);
             return paint;
         }
 
@@ -260,8 +258,22 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             float textSize = resources.getDimension(isRound
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
-
             mTextPaint.setTextSize(textSize);
+
+            int dateTextSize = resources.getInteger(isRound
+                ? R.integer.date_text_size_round : R.integer.date_text_size);
+            datePaint.setTextSize(dateTextSize);
+
+            int tmpTextSize = resources.getInteger(isRound
+                    ? R.integer.tmp_text_size_round : R.integer.tmp_text_size);
+            maxTempPaint.setTextSize(tmpTextSize);
+            minTempPaint.setTextSize(tmpTextSize);
+
+            imageHeight =  resources.getInteger(isRound
+                ? R.integer.image_height_round : R.integer.image_height);
+
+            imageWidth = resources.getInteger(isRound
+                ? R.integer.image_width_round : R.integer.image_width);
         }
 
         @Override
@@ -341,6 +353,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             canvas.drawLine(startLineXOffset, startLineYOffset, startLineXOffset + lineLength, startLineYOffset ,datePaint);
 
             if (weatherBitmap != null){
+                weatherBitmap = Bitmap.createScaledBitmap(weatherBitmap,imageWidth,imageHeight,false);
+
                 canvas.drawBitmap(weatherBitmap, imageXOffset , imageYOffset ,null);
                 canvas.drawText(maxTemp, maxXOffset, maxYOffset,maxTempPaint);
                 canvas.drawText(minTemp, minXOffset, minYOffset,minTempPaint);
