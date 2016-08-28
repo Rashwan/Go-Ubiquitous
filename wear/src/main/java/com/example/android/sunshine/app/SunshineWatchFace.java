@@ -28,8 +28,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -38,9 +36,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Wearable;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -61,8 +57,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
     }
 
 
-    private class Engine extends CanvasWatchFaceService.Engine implements
-            GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener{
+    private class Engine extends CanvasWatchFaceService.Engine {
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
         Paint mTextPaint;
@@ -105,12 +100,12 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         Bitmap weatherBitmap;
         Paint maxTempPaint;
         Paint minTempPaint;
+        BroadcastReceiver receiver;
 
 
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
-            googleApiClient = createGoogleApiClient();
             setWatchFaceStyle(new WatchFaceStyle.Builder(SunshineWatchFace.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
@@ -130,32 +125,41 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             minTempPaint = createMinTempPaint(resources.getColor(R.color.off_white));
 
             mCalendar = Calendar.getInstance();
-            BroadcastReceiver receiver = new BroadcastReceiver() {
+            receiver = createWeatherReceiver();
+            registerWeatherReceiver(receiver);
+            beginStartupSync();
+        }
+
+        private void beginStartupSync() {
+            Intent startupSyncIntent = new Intent(getApplicationContext(),MessagesService.class);
+            startupSyncIntent.setAction(MessagesService.ACTION_SYNC_IMMEDIATELY);
+            getApplicationContext().startService(startupSyncIntent);
+        }
+
+        private BroadcastReceiver createWeatherReceiver() {
+            return new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     Log.d(TAG,"Broadcast received");
-                    minTemp = intent.getStringExtra("MIN_TEMP");
-                    Log.d(TAG,minTemp);
-                    maxTemp = intent.getStringExtra("MAX_TEMP");
-                    weatherBitmap = intent.getParcelableExtra("IMAGE");
+                    minTemp = intent.getStringExtra(ListenerService.KEY_MIN_TEMP);
+                    maxTemp = intent.getStringExtra(ListenerService.KEY_MAX_TEMP);
+                    weatherBitmap = intent.getParcelableExtra(ListenerService.KEY_WEATHER_IMAGE);
 
                     invalidate();
 
                 }
             };
+
+        }
+        private void registerWeatherReceiver(BroadcastReceiver receiver){
             LocalBroadcastManager.getInstance(getApplicationContext())
-                    .registerReceiver(receiver,new IntentFilter("dispatch"));
-            Intent startupSyncIntent = new Intent(getApplicationContext(),MessagesService.class);
-            startupSyncIntent.setAction(MessagesService.SYNC_IMMEDIATELY_ACTION);
-            getApplicationContext().startService(startupSyncIntent);
+                    .registerReceiver(receiver,new IntentFilter(ListenerService.ACTION_DISPATCH_TO_UI));
+        }
+        private void unregisterWeatherReceiver(BroadcastReceiver receiver){
+            LocalBroadcastManager.getInstance(getApplicationContext())
+                    .unregisterReceiver(receiver);
         }
 
-        private GoogleApiClient createGoogleApiClient(){
-            return new GoogleApiClient.Builder(getApplicationContext())
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(Wearable.API).build();
-        }
         private Paint createTextPaint(int textColor) {
             Paint paint = new Paint();
             paint.setColor(textColor);
@@ -191,12 +195,13 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             if (visible) {
                 registerReceiver();
-
+                registerWeatherReceiver(receiver);
                 // Update time zone in case it changed while we weren't visible.
                 mCalendar.setTimeZone(TimeZone.getDefault());
                 invalidate();
             } else {
                 unregisterReceiver();
+                unregisterWeatherReceiver(receiver);
             }
 
         }
@@ -298,9 +303,9 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
                     mTextPaint.setAntiAlias(!inAmbientMode);
-                }
-                if (mAmbient){
-                    mBackgroundPaint.setColor(resources.getColor(R.color.black));
+                    datePaint.setAntiAlias(!inAmbientMode);
+                    maxTempPaint.setAntiAlias(!inAmbientMode);
+                    minTempPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -357,28 +362,12 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             if (weatherBitmap != null){
                 weatherBitmap = Bitmap.createScaledBitmap(weatherBitmap,imageWidth,imageHeight,false);
-
-                canvas.drawBitmap(weatherBitmap, imageXOffset , imageYOffset ,null);
+                if (!isInAmbientMode()){
+                    canvas.drawBitmap(weatherBitmap, imageXOffset , imageYOffset ,null);
+                }
                 canvas.drawText(maxTemp, maxXOffset, maxYOffset,maxTempPaint);
                 canvas.drawText(minTemp, minXOffset, minYOffset,minTempPaint);
             }
-
-        }
-
-        @Override
-        public void onConnected(@Nullable Bundle bundle) {
-            Log.d(TAG,"Google api connected");
-        }
-
-        @Override
-        public void onConnectionSuspended(int i) {
-            Log.d(TAG,"Google api suspended");
-
-        }
-
-        @Override
-        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            Log.d(TAG,"Google api connection failed");
 
         }
     }

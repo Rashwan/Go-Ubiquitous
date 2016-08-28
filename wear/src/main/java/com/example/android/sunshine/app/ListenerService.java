@@ -24,6 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 public class ListenerService extends WearableListenerService {
     private static final String TAG = ListenerService.class.getSimpleName();
+    public static final String KEY_MIN_TEMP = "MIN_TEMP";
+    public static final String KEY_MAX_TEMP = "MAX_TEMP";
+    public static final String KEY_WEATHER_IMAGE = "WEATHER_IMAGE";
+    public static final String ACTION_DISPATCH_TO_UI = "ACTION_DISPATCH_TO_UI";
     Bitmap bitmap;
 
 
@@ -33,17 +37,17 @@ public class ListenerService extends WearableListenerService {
         for (DataEvent event: dataEventBuffer) {
             if (event.getType() == DataEvent.TYPE_CHANGED && event.getDataItem()!= null){
                 DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                String minTemp = dataMapItem.getDataMap().getString("MIN_TEMP");
-                String maxTemp = dataMapItem.getDataMap().getString("MAX_TEMP");
-                Asset image = dataMapItem.getDataMap().getAsset("IMAGE");
+                String minTemp = dataMapItem.getDataMap().getString(KEY_MIN_TEMP);
+                String maxTemp = dataMapItem.getDataMap().getString(KEY_MAX_TEMP);
+                Asset image = dataMapItem.getDataMap().getAsset(KEY_WEATHER_IMAGE);
                 if (bitmap != null){
                     bitmap.recycle();
                 }
                 bitmap = loadBitmapFromAsset(image);
-                Intent intent = new Intent("dispatch");
-                intent.putExtra("MIN_TEMP",minTemp);
-                intent.putExtra("MAX_TEMP",maxTemp);
-                intent.putExtra("IMAGE",bitmap);
+                Intent intent = new Intent(ACTION_DISPATCH_TO_UI);
+                intent.putExtra(KEY_MIN_TEMP,minTemp);
+                intent.putExtra(KEY_MAX_TEMP,maxTemp);
+                intent.putExtra(KEY_WEATHER_IMAGE,bitmap);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
         }

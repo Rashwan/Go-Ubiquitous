@@ -3,4 +3,9 @@
     <string name="message">Watch face tapped</string>
     <string name="my_digital_name">Sunshine</string>
     <string name="get_weather_capability_name" translatable="false">get_weather</string>
+    <string name="put_weather_path">/put_weather</string>
+    <string name="get_weather_path">/get_weather</string>
+    <string name="get_weather_message">Start syncing</string>
+
+
 </resources>

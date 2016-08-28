@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.google.android.gms.common.ConnectionResult;
@@ -35,10 +36,12 @@ public class WearSyncService extends IntentService{
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
     };
-    // these indices must match the projection
     private static final int INDEX_WEATHER_ID = 0;
     private static final int INDEX_MAX_TEMP = 1;
     private static final int INDEX_MIN_TEMP = 2;
+    private static final String KEY_MIN_TEMP = "MIN_TEMP";
+    private static final String KEY_MAX_TEMP = "MAX_TEMP";
+    private static final String KEY_WEATHER_IMAGE = "WEATHER_IMAGE";
 
     public WearSyncService() {
         super(TAG);
@@ -85,12 +88,11 @@ public class WearSyncService extends IntentService{
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(),weatherArtResourceId);
             Asset asset = createAssetFromBitmap(bitmap);
 
-            PutDataMapRequest dataMap = PutDataMapRequest.create("/weather");
+            PutDataMapRequest dataMap = PutDataMapRequest.create(getString(R.string.put_weather_path));
 
-            dataMap.getDataMap().putString("MIN_TEMP",formattedMinTemperature);
-            dataMap.getDataMap().putString("MAX_TEMP",formattedMaxTemperature);
-            dataMap.getDataMap().putAsset("IMAGE",asset);
-            dataMap.getDataMap().putString("KEY", String.valueOf(Math.random()));
+            dataMap.getDataMap().putString(KEY_MIN_TEMP,formattedMinTemperature);
+            dataMap.getDataMap().putString(KEY_MAX_TEMP,formattedMaxTemperature);
+            dataMap.getDataMap().putAsset(KEY_WEATHER_IMAGE,asset);
 
             PutDataRequest request = dataMap.setUrgent().asPutDataRequest();
             DataApi.DataItemResult result = Wearable.DataApi.putDataItem(googleApiClient, request)

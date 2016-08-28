@@ -23,8 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MessagesService extends IntentService{
     private static final String TAG  = MessagesService.class.getSimpleName();
-    public static final String SYNC_IMMEDIATELY_ACTION = "com.example.android.sunshine.app.SYNC_IMMEDIATELY_ACTION";
-    private static final String GET_WEATHER_MESSAGE_PATH = "/get_weather";
+    public static final String ACTION_SYNC_IMMEDIATELY = "com.example.android.sunshine.app.ACTION_SYNC_IMMEDIATELY";
 
     GoogleApiClient googleApiClient;
 
@@ -36,7 +35,7 @@ public class MessagesService extends IntentService{
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG,"Received Intent");
-        if (intent.getAction().equals(SYNC_IMMEDIATELY_ACTION)){
+        if (intent.getAction().equals(ACTION_SYNC_IMMEDIATELY)){
             googleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(Wearable.API)
                     .build();
@@ -68,8 +67,9 @@ public class MessagesService extends IntentService{
     }
     private void sendMessage(String nodeId){
         if (nodeId != null){
-            Wearable.MessageApi.sendMessage(googleApiClient,nodeId,GET_WEATHER_MESSAGE_PATH
-                ,"Start syncing".getBytes())
+            Wearable.MessageApi.sendMessage(googleApiClient,nodeId
+                ,getString(R.string.get_weather_path)
+                ,getString(R.string.get_weather_message).getBytes())
             .setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
                 @Override
                 public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
