@@ -145,6 +145,9 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             };
             LocalBroadcastManager.getInstance(getApplicationContext())
                     .registerReceiver(receiver,new IntentFilter("dispatch"));
+            Intent startupSyncIntent = new Intent(getApplicationContext(),MessagesService.class);
+            startupSyncIntent.setAction(MessagesService.SYNC_IMMEDIATELY_ACTION);
+            getApplicationContext().startService(startupSyncIntent);
         }
 
         private GoogleApiClient createGoogleApiClient(){

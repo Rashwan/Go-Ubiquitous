@@ -1,0 +1,6 @@
+<resources>
+    <string-array name="android_wear_capabilities" translatable="false">
+        <!-- declaring that phone has the capability to get the weather -->
+        <item>@string/get_weather_capability_name</item>
+    </string-array>
+</resources>

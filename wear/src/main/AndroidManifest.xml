@@ -31,6 +31,8 @@
                 <data android:scheme="wear" android:host="*" android:pathPrefix="/weather"/>
             </intent-filter>
         </service>
+        <service android:name=".MessagesService"/>
+
 
 
         <meta-data android:name="com.google.android.gms.version"
